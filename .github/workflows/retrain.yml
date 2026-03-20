@@ -10,6 +10,9 @@ concurrency:
   group: retrain
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   retrain:
     runs-on: ubuntu-latest
