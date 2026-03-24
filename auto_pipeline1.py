@@ -45,7 +45,7 @@ def step2_stedgeai():
     r = subprocess.run([
         STEDGEAI, "generate",
         "--model", str(MODEL),
-        "--target", "stm32f7",
+        "--target", "stm32f4",
         "--output", str(GEN_DIR),
         "--name", "network",
     ], capture_output=True, text=True, timeout=120)
@@ -203,15 +203,21 @@ def listen_uart():
                 label  = buf[1]
                 pixels = np.frombuffer(buf[2:2+28*28], dtype=np.uint8).reshape(28,28).copy()
                 buf    = buf[SAMPLE_SIZE:]
-                if label > 9:
+                if label > 10:
                     print(f"[UART] Invalid label {label}, skipping")
                     continue
                 ts    = int(time.time() * 1000)
-                fname = CORRECTIONS / f"label{label}_{ts}.npy"
-                np.save(str(fname), pixels)
-                total = len(list(CORRECTIONS.glob("*.npy")))
-                print(f"[RECV] ✓ label={label}  total_corrections={total}")
-                Thread(target=run_pipeline, daemon=True).start()
+                if label==10:
+                    inv_dir=(r"C\STM32_OTA1\invalid_samples")
+                    inv_dir.mkdir(exist_ok=True)
+                    fname=inv_dir/f"invalid_{ts}.npy"
+                    np.save(str(fname),pixels)
+                    print(f"[RECV] Invalid sample saved")
+                else:    
+                    fname = CORRECTIONS / f"label{label}_{ts}.npy"
+                    np.save(str(fname), pixels)
+                    print(f"[RECV] ✓ label={label} saved")
+                
         except serial.SerialException as e:
             print(f"[UART] Error: {e} — retrying in 2s")
             time.sleep(2)

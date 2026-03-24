@@ -6,21 +6,22 @@ on:
     paths:
       - 'corrections/**'
 
+concurrency:
+  group: retrain
+  cancel-in-progress: true
+
 jobs:
   retrain:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
+      
 
       - name: Install dependencies
-        run: pip install tensorflow numpy
+        run: pip install tensorflow==2.18.0 numpy==2.0.2
 
       - name: Train
         env:
@@ -33,3 +34,4 @@ jobs:
         with:
           name: trained-model
           path: model/mnist.keras
+          retention-days: 30
