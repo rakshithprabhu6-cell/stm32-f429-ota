@@ -47,6 +47,12 @@ def load_az_csv(count=8000):
         df = pd.read_csv(path, header=None)
         images = df.iloc[:count, 1:].values
         images = images.reshape(-1, 28, 28).astype(np.uint8)
+        
+        # Invert if white background
+        for i in range(len(images)):
+            if images[i].mean() > 127:
+                images[i] = 255 - images[i]
+        
         y = np.full(len(images), 10, dtype=np.uint8)
         print(f"      A-Z loaded: {len(images)} samples")
         return images, y
@@ -226,9 +232,9 @@ def build_model():
 def setup():
     # Load all data
     X_mnist, y_mnist, X_test, y_test = load_mnist()
-    X_az,    y_az    = load_az_csv(8000)
-    X_math, y_math = load_math_images(5000)
-    X_dots,  y_dots  = generate_invalid(2000)
+    X_az,    y_az    = load_az_csv(15000)
+    X_math, y_math = load_math_images(8000)
+    X_dots,  y_dots  = generate_invalid(5000)
     X_local, y_local = load_local_invalid()
 
     # Combine invalid
