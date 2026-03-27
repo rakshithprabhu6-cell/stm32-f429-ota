@@ -48,7 +48,7 @@ def step2_stedgeai():
         "--target", "stm32f4",
         "--output", str(GEN_DIR),
         "--name", "network",
-    ], capture_output=True, text=True, timeout=120)
+    ], capture_output=True, text=True, timeout=400)
 
     if r.returncode == 0:
         print("[STEDGEAI] ✓ Done!")
@@ -87,7 +87,7 @@ def step4_build():
         "-application", "org.eclipse.cdt.managedbuilder.core.headlessbuild",
         "-data", WORKSPACE,
         "-build", PROJECT,
-    ], capture_output=True, text=True, timeout=300)
+    ], capture_output=True, text=True, timeout=400)
 
     # Check for .elf or .bin as success indicator
     elf = Path(BIN_PATH)
@@ -122,7 +122,7 @@ def step5_flash():
         "-w", fw, "0x08000000",
         "-v",
         "-rst",
-    ], capture_output=True, text=True, timeout=120)
+    ], capture_output=True, text=True, timeout=400)
 
     if r.returncode == 0:
         print("[FLASH] ✓ Board flashed and reset!")

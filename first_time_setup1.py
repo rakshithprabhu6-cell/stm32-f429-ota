@@ -39,34 +39,43 @@ def load_mnist():
     return X_train, y_train, X_test, y_test
 
 #  A-Z CSV (class 10) 
-def load_az_csv(count=8000):
+def load_az_csv(count=None):
     print("\n[2/4] Loading A-Z Handwritten CSV...")
-    path =(r"C:\Users\HP\Downloads\archive (3)\A_Z Handwritten Data.csv")
+
+    path = r"C:\Users\HP\Downloads\archive (3)\A_Z Handwritten Data.csv"
 
     try:
         df = pd.read_csv(path, header=None)
-        images = df.iloc[:count, 1:].values
-        images = images.reshape(-1, 28, 28).astype(np.uint8)
-        
-        # Invert if white background
-        for i in range(len(images)):
-            if images[i].mean() > 127:
-                images[i] = 255 - images[i]
-        
-        y = np.full(len(images), 10, dtype=np.uint8)
-        print(f"      A-Z loaded: {len(images)} samples")
-        return images, y
+
+        # Limit rows if needed
+        if count is not None:
+            df = df.iloc[:count]
+
+        # Column 0 → labels (0–25)
+        labels = df.iloc[:, 0].values.astype(np.uint8)
+
+        # Columns 1–784 → pixel values
+        images = df.iloc[:, 1:].values.astype(np.uint8)
+
+        # Reshape into 28x28 images
+        images = images.reshape(-1, 28, 28)
+
+        # Invert images if background is white
+        if images.mean() > 127:
+            images = 255 - images
+
+        print(f"      Loaded: {len(images)} samples")
+        print(f"      Classes: {np.unique(labels)}")
+
+        return images, labels
 
     except FileNotFoundError:
-        print("File not found — skipping")
-        print(r"Expected: C:\Users\HP\Downloads\archive (3)\A_Z Handwritten Data.csv")
-        return np.zeros((0,28,28), dtype=np.uint8), \
-               np.array([], dtype=np.uint8)
-    except Exception as e:
-        print(f"FAILED: {e}")
-        return np.zeros((0,28,28), dtype=np.uint8), \
-               np.array([], dtype=np.uint8)
+        print("File not found")
+        return np.zeros((0,28,28), dtype=np.uint8), np.array([], dtype=np.uint8)
 
+    except Exception as e:
+        print(f"Error: {e}")
+        return np.zeros((0,28,28), dtype=np.uint8), np.array([], dtype=np.uint8)
 # ── 3. Math Symbols CSV (class 10) ───
 def load_math_images(count=5000):
     print("\n[3/4] Loading Math Symbols (image folders)...")
