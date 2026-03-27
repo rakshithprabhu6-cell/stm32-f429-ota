@@ -3,7 +3,6 @@ import time, requests, base64, subprocess
 from pathlib import Path
 from threading import Thread
 
-# UART, Git
 from dotenv import load_dotenv
 load_dotenv()
 GITHUB_TOKEN  = os.getenv("GITHUB_TOKEN", "")
@@ -30,10 +29,8 @@ HEADERS     = {
 }
 
 # ── Folders ───────────────────────────────────────────────────
-CORR_DIR    = Path(r"C:\STM32_OTA1\corrections")
-INVALID_DIR = Path(r"C:\STM32_OTA1\invalid_samples")
+CORR_DIR = Path(r"C:\STM32_OTA1\corrections")
 CORR_DIR.mkdir(parents=True, exist_ok=True)
-INVALID_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ── Serial helpers ─────────────────────────────────────────────
@@ -51,7 +48,6 @@ def connect_serial(port, baud, retries=20, delay=3):
 
 # ── GitHub helpers ─────────────────────────────────────────────
 def upload_sample(label, pixels):
-    """Upload correction sample to GitHub repo"""
     ts      = int(time.time() * 1000)
     fname   = f"label{label}_{ts}.npy"
     content = base64.b64encode(pixels.tobytes()).decode()
@@ -221,7 +217,6 @@ def listen():
     print(f"  Retrain every: {RETRAIN_EVERY} errors")
     print("=" * 45)
     print("  Draw → PREDICT → WRONG → select digit")
-    print("  Tap INV button to send invalid sample")
     print("  Cloud retrains in ~2 min automatically")
     print("=" * 45 + "\n")
 
@@ -243,50 +238,33 @@ def listen():
                 ).reshape(28, 28).copy()
                 buf = buf[SAMPLE_SIZE:]
 
-                # ── Allow 0-10  (10 = invalid class) ──────────
-                if label > 10:
+                # ── Allow digits 0-9 only ──────────────────────
+                if label > 9:
                     print(f"[RECV] Bad label {label} — skip")
                     continue
 
                 ts = int(time.time() * 1000)
 
-                if label == 10:
-                    # ── Save to invalid_samples folder ─────────
-                    fname = f"invalid_{ts}.npy"
-                    INVALID_DIR.mkdir(parents=True, exist_ok=True)
-                    np.save(str(INVALID_DIR / fname), pixels)
-                    total = len(list(INVALID_DIR.glob("*.npy")))
-                    print(f"[RECV] ✓ Invalid sample saved  total={total}")
-                    # Trigger retrain including invalid samples
+                correction_count += 1
+                fname = f"label{label}_{ts}.npy"
+                CORR_DIR.mkdir(parents=True, exist_ok=True)
+                np.save(str(CORR_DIR / fname), pixels)
+                print(f"[RECV] ✓ label={label}")
+                print(f"[RECV] Corrections: {correction_count}/{RETRAIN_EVERY}")
+                print(f"[RECV] Saved locally: {fname}")
+
+                if correction_count % RETRAIN_EVERY == 0:
+                    print(f"[PIPELINE] {RETRAIN_EVERY} errors reached — retraining!")
+                    correction_count = 0
                     Thread(
                         target=handle_sample,
                         args=(label, pixels),
                         daemon=True
                     ).start()
-
                 else:
-                    # ── Save to corrections folder ──────────────
-                    correction_count += 1
-                    fname = f"label{label}_{ts}.npy"
-                    CORR_DIR.mkdir(parents=True, exist_ok=True)
-                    np.save(str(CORR_DIR / fname), pixels)
-                    print(f"[RECV] ✓ label={label}")
-                    print(f"[RECV] Corrections: {correction_count}/{RETRAIN_EVERY}")
-                    print(f"[RECV] Saved locally: {fname}")
+                    remaining = RETRAIN_EVERY - (correction_count % RETRAIN_EVERY)
+                    print(f"[RECV] Need {remaining} more errors before retraining")
 
-                    if correction_count % RETRAIN_EVERY == 0:
-                        print(f"[PIPELINE] {RETRAIN_EVERY} errors reached — retraining!")
-                        correction_count = 0
-                        Thread(
-                            target=handle_sample,
-                            args=(label, pixels),
-                            daemon=True
-                        ).start()
-                    else:
-                        remaining = RETRAIN_EVERY - (correction_count % RETRAIN_EVERY)
-                        print(f"[RECV] Need {remaining} more errors before retraining")
-
-        # ── Reconnect after board resets during OTA flash ──────
         except serial.SerialException as e:
             print(f"[SERIAL] Lost connection: {e}")
             print("[SERIAL] Waiting for board to restart...")
