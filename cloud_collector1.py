@@ -30,7 +30,9 @@ HEADERS     = {
 
 # ── Folders ───────────────────────────────────────────────────
 CORR_DIR = Path(r"C:\STM32_OTA1\corrections")
+INVALID_DIR=Path(r"C:\STM32_OTA1\invalid_samples")
 CORR_DIR.mkdir(parents=True, exist_ok=True)
+INVALID_DIR.mkdir(parents=True,exist_ok=True)
 
 
 # ── Serial helpers ─────────────────────────────────────────────
@@ -239,11 +241,23 @@ def listen():
                 buf = buf[SAMPLE_SIZE:]
 
                 # ── Allow digits 0-9 only ──────────────────────
-                if label > 9:
+                if label > 10:
                     print(f"[RECV] Bad label {label} — skip")
                     continue
 
                 ts = int(time.time() * 1000)
+
+                if label==10:
+                    fname=f"invalid_{ts}.npy"
+                    np.save(str(INVALID_DIR/fname),pixels)
+                    total=len(list(INVALID_DIR.glob("*.npy")))
+                    print(f"[RECV]Lette/invalid detected-saved total={total}")
+                    Thread(
+                        target=handle_sample,
+                        args=(label,pixels),
+                        daemon=True
+                    ).start()
+                    continue
 
                 correction_count += 1
                 fname = f"label{label}_{ts}.npy"

@@ -6,11 +6,14 @@ os.environ["TF_NUM_INTRAOP_THREADS"] = "4"
 import numpy as np
 import tensorflow as tf
 from pathlib import Path
+import pandas as pd
 
 #  Create all folders 
 Path(r"C:\STM32_OTA1\model").mkdir(parents=True,      exist_ok=True)
 Path(r"C:\STM32_OTA1\corrections").mkdir(parents=True, exist_ok=True)
 Path(r"C:\STM32_OTA1\model\generated").mkdir(parents=True, exist_ok=True)
+Path(r"C:\STM32_OTA1\invalid_samples").mkdir(parents=True,exist_ok=True)
+NUM_CLASSES=11
 
 MODEL      = r"C:\STM32_OTA1\model\mnist.keras"
 BASE_MODEL = r"C:\STM32_OTA1\model\mnist_base.keras"
@@ -30,6 +33,24 @@ x_test  = x_test.astype("float32")[..., None]  / 255.0
 print(f"      Train : {x_train.shape}")
 print(f"      Test  : {x_test.shape}")
 
+# Loading  A-Z dataset
+print("\n[2/4]Loading A-Z samples (class 10=invalid)...") 
+az_path=r"C:\Users\HP\Downloads\archive (6)\handwritten_data_785.csv"
+try:
+    df   = pd.read_csv(az_path, header=None).iloc[:15000]
+    x_az = df.iloc[:, 1:].values.reshape(-1,28,28,1).astype("float32")/255.0
+    y_az = np.full(len(x_az), 10, dtype=np.int32)
+    print(f"      A-Z loaded: {len(x_az)} samples")
+except Exception as e:
+    print(f"      A-Z skipped: {e}")
+    x_az = np.zeros((0,28,28,1), dtype="float32")
+    y_az = np.array([], dtype=np.int32)
+
+x_all = np.concatenate([x_train, x_az], axis=0)
+y_all = np.concatenate([y_train, y_az], axis=0).astype(np.int32)
+idx   = np.random.permutation(len(x_all))
+x_all, y_all = x_all[idx], y_all[idx]
+
 #   Build model 
 print("\n[2/3] Building model...")
 model = tf.keras.Sequential(
@@ -41,7 +62,7 @@ model = tf.keras.Sequential(
         tf.keras.layers.MaxPooling2D(),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(128, activation="relu"),
-        tf.keras.layers.Dense(10,  activation="softmax"),
+        tf.keras.layers.Dense(NUM_CLASSES,  activation="softmax"),
     ],
     name="mnist_model",
 )
@@ -59,7 +80,7 @@ print("\n[3/3] Training... (5-6 min on i3, please wait)")
 print("      Do NOT close this window\n")
 
 model.fit(
-    x_train, y_train,
+    x_all, y_all,
     epochs          = 5,
     batch_size      = 128,
     validation_data = (x_test, y_test),
