@@ -1,10 +1,10 @@
 name: Retrain OTA
-
 on:
   workflow_dispatch:
   push:
     paths:
       - 'corrections/**'
+      - 'invalid_samples/**'
 
 concurrency:
   group: retrain
@@ -13,13 +13,12 @@ concurrency:
 jobs:
   retrain:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: pip install tensorflow==2.18.0 numpy==2.0.2 Pillow
+        run: pip install tensorflow==2.18.0 numpy==2.0.2 Pillow==10.4.0 keras==3.5.0
 
       - name: Train
         env:
@@ -27,7 +26,16 @@ jobs:
           PYTHONUTF8: "1"
         run: python train1.py
 
-      # ✅ FIX: Create a GitHub Release with .keras as asset
+      - name: Commit trained model
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add model/mnist.keras
+          git diff --staged --quiet || git commit -m "Update model [run ${{ github.run_number }}]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -50,7 +58,6 @@ jobs:
           asset_name: mnist.keras
           asset_content_type: application/octet-stream
 
-      # Keep artifact as backup too
       - name: Upload model artifact
         uses: actions/upload-artifact@v4
         with:
