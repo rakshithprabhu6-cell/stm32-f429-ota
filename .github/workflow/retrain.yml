@@ -18,18 +18,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      
-
       - name: Install dependencies
-        run: pip install tensorflow==2.18.0 numpy==2.0.2
+        run: pip install tensorflow==2.18.0 numpy==2.0.2 Pillow
 
       - name: Train
         env:
           PYTHONIOENCODING: utf-8
-          PYTHONUTF8: 1
+          PYTHONUTF8: "1"
         run: python train1.py
 
-      - name: Upload model
+      # ✅ FIX: Create a GitHub Release with .keras as asset
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: model-${{ github.run_number }}
+          release_name: "Model v${{ github.run_number }}"
+          body: "Auto-retrained model from corrections"
+          draft: false
+          prerelease: false
+
+      - name: Upload model to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: model/mnist.keras
+          asset_name: mnist.keras
+          asset_content_type: application/octet-stream
+
+      # Keep artifact as backup too
+      - name: Upload model artifact
         uses: actions/upload-artifact@v4
         with:
           name: trained-model
