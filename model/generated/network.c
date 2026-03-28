@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    network.c
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-03-27T10:58:24+0530
+  * @date    2026-03-27T14:16:17+0530
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -25,9 +25,9 @@
 #include "network_data.h"
 #include "stai_events.h"
 
-#include "ai_lite_inspect.h"
-
 #include "lite_operators.h"
+
+#include "ai_lite_inspect.h"
 /*****************************************************************************/
 #define STAI_INTERNAL_API_MAJOR               (1)
 #define STAI_INTERNAL_API_MINOR               (0)
@@ -152,8 +152,8 @@
 
 
 /*****************************************************************************/
-#define _STAI_NETWORK_MODEL_SIGNATURE     "0x14c81e510c921ad4c4c2fdcc07e58937"
-#define _STAI_NETWORK_DATETIME            "2026-03-27T10:58:24+0530"
+#define _STAI_NETWORK_MODEL_SIGNATURE     "0xd914576141594a73a5e2ad23f0f0eaa5"
+#define _STAI_NETWORK_DATETIME            "2026-03-27T14:16:17+0530"
 #define _STAI_NETWORK_COMPILE_DATETIME    __DATE__ " " __TIME__
 
 #define _STAI_CONTEXT_ALIGNMENT        STAI_NETWORK_CONTEXT_ALIGNMENT
@@ -199,7 +199,7 @@ static const stai_network_info g_network_info = {
       STAI_NETWORK_OUT_1_FLAGS,
       STAI_NETWORK_OUT_1_FORMAT,
       STAI_NETWORK_OUT_1_SIZE_BYTES,
-      STAI_DECLARE_ARRAY(int32_t, 2, 1, 10),
+      STAI_DECLARE_ARRAY(int32_t, 2, 1, 11),
       STAI_EMPTY_ARRAY(),
       STAI_EMPTY_ARRAY()),
     },
@@ -219,7 +219,7 @@ static const stai_network_info g_network_info = {
       STAI_NETWORK_WEIGHT_1_FLAGS,
       STAI_FORMAT_U8,
       STAI_NETWORK_WEIGHT_1_SIZE_BYTES,
-      STAI_DECLARE_ARRAY(int32_t, 1, 900136),
+      STAI_DECLARE_ARRAY(int32_t, 1, 900652),
       STAI_EMPTY_ARRAY(),
       STAI_EMPTY_ARRAY()),
     },
@@ -480,7 +480,7 @@ static const ai_i32 conv2d_1_t_in_0_shape_ch_h_w_prod_const_s32 = 7744;
 static const ai_i32 dense_t_in_0_shape_ch_prod_const_s32 = 128;
 
 
-static const ai_i32 dense_1_t_in_0_shape_ch_prod_const_s32 = 10;
+static const ai_i32 dense_1_t_in_0_shape_ch_prod_const_s32 = 11;
 STAI_API_ENTRY
 stai_return_code stai_network_run(
   stai_network* network,
@@ -604,9 +604,9 @@ stai_return_code stai_network_run(
       .output = (float*)(net_ctx->_activations[0] + 512),
       .input = (float*)(net_ctx->_activations[0] + 0),
       .weights = (float*)(net_ctx->_weights[0] + 894976),
-      .bias = (float*)(net_ctx->_weights[0] + 900096),
+      .bias = (float*)(net_ctx->_weights[0] + 900608),
       .n_channel_in = 128,
-      .n_channel_out = 10,
+      .n_channel_out = 11,
       .n_elements = 1,
     };
   
@@ -624,7 +624,7 @@ stai_return_code stai_network_run(
   
   _STAI_NETWORK_EVENT_NODE_START_CB(6, 1, {(stai_ptr) dense_1_t_in_0_ptr_const_handle});
     
-  forward_lite_nl_softmax_if32of32(dense_1_t_out_0_ptr_handle, dense_1_t_in_0_ptr_const_handle, dense_1_t_in_0_shape_ch_prod_const_s32, 1, 10);
+  forward_lite_nl_softmax_if32of32(dense_1_t_out_0_ptr_handle, dense_1_t_in_0_ptr_const_handle, dense_1_t_in_0_shape_ch_prod_const_s32, 1, 11);
     
   _STAI_NETWORK_EVENT_NODE_STOP_CB(6, 1, {(stai_ptr) dense_1_t_out_0_ptr_handle});
   }

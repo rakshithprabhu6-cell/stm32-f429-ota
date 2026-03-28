@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file    network.h
-  * @date    2026-03-27T10:58:24+0530
+  * @date    2026-03-27T14:16:17+0530
   * @brief   ST.AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -31,8 +31,8 @@ const stai_network_details g_network_details = {
    { .size_bytes = 6400, .flags = (STAI_FLAG_HAS_BATCH|STAI_FLAG_CHANNEL_LAST), .format = STAI_FORMAT_FLOAT32, .shape = {4, (const int32_t[4]){1, 5, 5, 64}}, .scale = {0, NULL}, .zeropoint = {0, NULL}, .name = "max_pooling2d_1_output" },
    { .size_bytes = 512, .flags = (STAI_FLAG_HAS_BATCH|STAI_FLAG_CHANNEL_LAST), .format = STAI_FORMAT_FLOAT32, .shape = {2, (const int32_t[2]){1, 128}}, .scale = {0, NULL}, .zeropoint = {0, NULL}, .name = "dense_dense_output" },
    { .size_bytes = 512, .flags = (STAI_FLAG_HAS_BATCH|STAI_FLAG_CHANNEL_LAST), .format = STAI_FORMAT_FLOAT32, .shape = {2, (const int32_t[2]){1, 128}}, .scale = {0, NULL}, .zeropoint = {0, NULL}, .name = "dense_output" },
-   { .size_bytes = 40, .flags = (STAI_FLAG_HAS_BATCH|STAI_FLAG_CHANNEL_LAST), .format = STAI_FORMAT_FLOAT32, .shape = {2, (const int32_t[2]){1, 10}}, .scale = {0, NULL}, .zeropoint = {0, NULL}, .name = "dense_1_dense_output" },
-   { .size_bytes = 40, .flags = (STAI_FLAG_HAS_BATCH|STAI_FLAG_CHANNEL_LAST), .format = STAI_FORMAT_FLOAT32, .shape = {2, (const int32_t[2]){1, 10}}, .scale = {0, NULL}, .zeropoint = {0, NULL}, .name = "dense_1_output" }
+   { .size_bytes = 44, .flags = (STAI_FLAG_HAS_BATCH|STAI_FLAG_CHANNEL_LAST), .format = STAI_FORMAT_FLOAT32, .shape = {2, (const int32_t[2]){1, 11}}, .scale = {0, NULL}, .zeropoint = {0, NULL}, .name = "dense_1_dense_output" },
+   { .size_bytes = 44, .flags = (STAI_FLAG_HAS_BATCH|STAI_FLAG_CHANNEL_LAST), .format = STAI_FORMAT_FLOAT32, .shape = {2, (const int32_t[2]){1, 11}}, .scale = {0, NULL}, .zeropoint = {0, NULL}, .name = "dense_1_output" }
   },
   .nodes = (const stai_node_details[10]){
     {.id = 0, .type = AI_LAYER_CONV2D_TYPE, .input_tensors = {1, (const int32_t[1]){0}}, .output_tensors = {1, (const int32_t[1]){1}} }, /* conv2d_conv2d */

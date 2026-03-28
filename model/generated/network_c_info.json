@@ -327,15 +327,15 @@
       "mpool_id": 1,
       "name": "dense_1_dense_bias_array",
       "nbits": 32,
-      "offset_start": 900096,
+      "offset_start": 900608,
       "qmn": {},
       "shape": [
-        10
+        11
       ],
       "shape_map": [
         "CH"
       ],
-      "size_bytes": 40
+      "size_bytes": 44
     },
     {
       "alignment": 4,
@@ -357,12 +357,12 @@
       "offset_start": 512,
       "qmn": {},
       "shape": [
-        10
+        11
       ],
       "shape_map": [
         "CH"
       ],
-      "size_bytes": 40
+      "size_bytes": 44
     },
     {
       "alignment": 4,
@@ -384,14 +384,14 @@
       "offset_start": 894976,
       "qmn": {},
       "shape": [
-        10,
+        11,
         128
       ],
       "shape_map": [
         "CH",
         "CH_IN"
       ],
-      "size_bytes": 5120
+      "size_bytes": 5632
     },
     {
       "alignment": 4,
@@ -413,12 +413,12 @@
       "offset_start": 0,
       "qmn": {},
       "shape": [
-        10
+        11
       ],
       "shape_map": [
         "CH"
       ],
-      "size_bytes": 40
+      "size_bytes": 44
     },
     {
       "alignment": 4,
@@ -626,32 +626,32 @@
   ],
   "environment": {
     "generated_model": {
-      "generated_time": "2026-03-27T10:58:24+0530",
+      "generated_time": "2026-03-27T14:16:17+0530",
       "model_files": [
         {
           "name": "network_data.h",
-          "signature": "0xfe6416bea09ababf679dc3c5157817fc"
+          "signature": "0x7c3103b8ce10a1d41f8a1b237cf04953"
         },
         {
           "name": "network_data.c",
-          "signature": "0x37c89a26a31534f2fb01d197854942db"
+          "signature": "0xb66435888e3889eb5c215bb592e6555f"
         },
         {
           "name": "network.h",
-          "signature": "0xdca5d9d5708ebe0cae94393c4947dd3b"
+          "signature": "0x1d4e342c36f923bbc365f35fb548572a"
         },
         {
           "name": "network.c",
-          "signature": "0xbf15321c197663d54a4ea6e77949bf02"
+          "signature": "0x53b1a73eb0ff1323c95d7221be0049ee"
         },
         {
           "name": "network_details.h",
-          "signature": "0xa802416601950c9c874090e5b1c72456"
+          "signature": "0xf2ff768c81b724fcfec24addc41e5b06"
         }
       ],
       "name": "network"
     },
-    "network_signature": "0x8269490874d01c88",
+    "network_signature": "0xe230802e9b378cbb",
     "test_name": "",
     "tools": [
       {
@@ -661,12 +661,12 @@
           "model_files": [
             {
               "name": "mnist.keras",
-              "signature": "0x14c81e510c921ad4c4c2fdcc07e58937"
+              "signature": "0xd914576141594a73a5e2ad23f0f0eaa5"
             }
           ],
-          "n_params": 225034,
+          "n_params": 225163,
           "name": "mnist",
-          "size": 900136,
+          "size": 900652,
           "type": "keras"
         },
         "name": "ST.EdgeAI.Core",
@@ -1047,7 +1047,7 @@
         },
         {
           "attributes": {
-            "num_units": "10",
+            "num_units": "11",
             "use_bias": "True"
           },
           "id": 19,
@@ -1056,7 +1056,7 @@
             151,
             154
           ],
-          "macc": 1290,
+          "macc": 1419,
           "mapping": "NODE_SW",
           "name": "dense_1_dense",
           "original_nodes": [
@@ -1082,7 +1082,7 @@
           "inputs": [
             129
           ],
-          "macc": 150,
+          "macc": 165,
           "mapping": "NODE_SW",
           "name": "dense_1",
           "original_nodes": [
@@ -1137,7 +1137,7 @@
           "name": "dense_1",
           "shape": [
             null,
-            10
+            11
           ],
           "shape_map": [
             "BATCH",
@@ -1163,7 +1163,7 @@
     "toolchain": null,
     "toolchain_flash": null,
     "toolchain_ram": null,
-    "weights": 900136
+    "weights": 900652
   },
   "memory_pools": [
     {
@@ -1225,7 +1225,7 @@
       "rights": "ACC_READ",
       "size_bytes": -1,
       "subpools": [],
-      "used_size_bytes": 900136,
+      "used_size_bytes": 900652,
       "user_allocated": false,
       "virtual": false
     }

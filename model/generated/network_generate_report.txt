@@ -1,5 +1,5 @@
 ST Edge AI Core v3.0.0-20426 123672867
-Created date          : 2026-03-27 10:58:26
+Created date          : 2026-03-27 14:16:18
 Parameters            : generate --model C:\STM32_OTA1\model\mnist.keras --target stm32f4 --output C:\STM32_OTA1\model\generated --name network
 
 Exec/report summary (generate)
@@ -15,13 +15,13 @@ workspace dir      :   C:\STM32_OTA1\st_ai_ws
 output dir         :   C:\STM32_OTA1\model\generated                                    
 model_fmt          :   float                                                            
 model_name         :   mnist                                                            
-model_hash         :   0x14c81e510c921ad4c4c2fdcc07e58937                               
-params #           :   225,034 items (879.04 KiB)                                       
+model_hash         :   0xd914576141594a73a5e2ad23f0f0eaa5                               
+params #           :   225,163 items (879.54 KiB)                                       
 ----------------------------------------------------------------------------------------
 input 1/1          :   'input_0', f32(1x28x28x1), 3.06 KBytes, activations              
-output 1/1         :   'dense_1', f32(1x10), 40 Bytes, activations                      
-macc               :   2,688,960                                                        
-weights (ro)       :   900,136 B (879.04 KiB) (1 segment)                               
+output 1/1         :   'dense_1', f32(1x11), 44 Bytes, activations                      
+macc               :   2,689,104                                                        
+weights (ro)       :   900,652 B (879.54 KiB) (1 segment)                               
 activations (rw)   :   89,700 B (87.60 KiB) (1 segment) *                               
 ram (total)        :   89,700 B (87.60 KiB) = 89,700 + 0 + 0                            
 ----------------------------------------------------------------------------------------
@@ -47,10 +47,10 @@ m_id   layer (type,original)                  oshape                 param/size 
 5      dense_dense (Dense, Dense)             [b:1,c:128]            204,928/819,712       204,928           flatten   |                   +128(+0.1%)         Dense_/Nonlinearity_[6, 7]      
        dense (Nonlinearity, Dense)            [b:1,c:128]                                      128       dense_dense   |                   -128(-100.0%)       
 ------ -------------------------------------- ---------------------- ----------------- ----------- ----------------- --- ----------------- ------------------- ------------------------------- 
-6      dense_1_dense (Dense, Dense)           [b:1,c:10]             1,290/5,160             1,290             dense   |                   +150(+11.6%)        Dense_/Nonlinearity_[o][8, 9]   
-       dense_1 (Nonlinearity, Dense)          [b:1,c:10]                                       150     dense_1_dense   |                   -150(-100.0%)       
+6      dense_1_dense (Dense, Dense)           [b:1,c:11]             1,419/5,676             1,419             dense   |                   +165(+11.6%)        Dense_/Nonlinearity_[o][8, 9]   
+       dense_1 (Nonlinearity, Dense)          [b:1,c:11]                                       165     dense_1_dense   |                   -165(-100.0%)       
 ------ -------------------------------------- ---------------------- ----------------- ----------- ----------------- --- ----------------- ------------------- ------------------------------- 
-model/c-model: macc=2,688,960/2,688,960  weights=900,136/900,136  activations=--/89,700 io=--/0
+model/c-model: macc=2,689,104/2,689,104  weights=900,652/900,652  activations=--/89,700 io=--/0
 
 
 
@@ -61,8 +61,8 @@ c-name                : network
 c-node #              : 10
 c-array #             : 21
 activations size      : 89700 (1 segment)
-weights size          : 900136 (1 segment)
-macc                  : 2688960
+weights size          : 900652 (1 segment)
+macc                  : 2689104
 inputs                : ['input_0_output']
 outputs               : ['dense_1_output']
 
@@ -80,10 +80,10 @@ c_id   name (*_array)             item/size       domain/mem-pool           c-ty
 7      conv2d_conv2d_scratch0     9/36            activations/**default**   float                   
 8      conv2d_conv2d_weights      288/1152        weights/weights           const float             
 9      conv2d_output              21632/86528     activations/**default**   float                   
-10     dense_1_dense_bias         10/40           weights/weights           const float             
-11     dense_1_dense_output       10/40           activations/**default**   float                   
-12     dense_1_dense_weights      1280/5120       weights/weights           const float             
-13     dense_1_output             10/40           activations/**default**   float         /output   
+10     dense_1_dense_bias         11/44           weights/weights           const float             
+11     dense_1_dense_output       11/44           activations/**default**   float                   
+12     dense_1_dense_weights      1408/5632       weights/weights           const float             
+13     dense_1_output             11/44           activations/**default**   float         /output   
 14     dense_dense_bias           128/512         weights/weights           const float             
 15     dense_dense_output         128/512         activations/**default**   float                   
 16     dense_dense_weights        204800/819200   weights/weights           const float             
@@ -129,13 +129,13 @@ c_id   name (*_layer)    id   layer_type      macc      rom      tensors        
 7      dense             5    Nonlinearity    128       0        I: dense_dense_output         f32(1x128) (15)        
                                                                  O: dense_output               f32(1x128) (17)        
 ------ ----------------- ---- --------------- --------- -------- ----------------------------- ---------------------- 
-8      dense_1_dense     6    Dense           1290      5160     I: dense_output               f32(1x128) (17)        
-                                                                 W: dense_1_dense_weights      f32(10x128) (12)       
-                                                                 W: dense_1_dense_bias         f32(10) (10)           
-                                                                 O: dense_1_dense_output       f32(1x10) (11)         
+8      dense_1_dense     6    Dense           1419      5676     I: dense_output               f32(1x128) (17)        
+                                                                 W: dense_1_dense_weights      f32(11x128) (12)       
+                                                                 W: dense_1_dense_bias         f32(11) (10)           
+                                                                 O: dense_1_dense_output       f32(1x11) (11)         
 ------ ----------------- ---- --------------- --------- -------- ----------------------------- ---------------------- 
-9      dense_1           6    Nonlinearity    150       0        I: dense_1_dense_output       f32(1x10) (11)         
-                                                                 O: dense_1_output             f32(1x10) (13)         
+9      dense_1           6    Nonlinearity    165       0        I: dense_1_dense_output       f32(1x11) (11)         
+                                                                 O: dense_1_output             f32(1x11) (13)         
 ------ ----------------- ---- --------------- --------- -------- ----------------------------- ---------------------- 
 
 
@@ -152,17 +152,17 @@ c_id    m_id   name (type)                        #op           type
 5       3      max_pooling2d_1 (Pool)           6,400   smul_f32_f32 
 6       5      dense_dense (Dense)            204,928   smul_f32_f32 
 7       5      dense (Nonlinearity)               128     op_f32_f32 
-8       6      dense_1_dense (Dense)            1,290   smul_f32_f32 
-9       6      dense_1 (Nonlinearity)             150     op_f32_f32 
+8       6      dense_1_dense (Dense)            1,419   smul_f32_f32 
+9       6      dense_1 (Nonlinearity)             165     op_f32_f32 
 ------- ------ -------------------------- ----------- -------------- 
-total                                       2,688,960 
+total                                       2,689,104 
 
 Number of operation types
 ---------------- ----------- ----------- 
 operation type             #           % 
 ---------------- ----------- ----------- 
-smul_f32_f32       2,659,306       98.9% 
-op_f32_f32            29,654        1.1% 
+smul_f32_f32       2,659,435       98.9% 
+op_f32_f32            29,669        1.1% 
 
 Complexity report (model)
 ------ ----------------- ------------------------- ------------------------- -------- 
@@ -172,10 +172,10 @@ m_id   name              c_macc                    c_rom                     c_i
 1      max_pooling2d     |                  0.8%   |                  0.0%   [2]      
 2      conv2d_1_conv2d   ||||||||||||||||  83.2%   ||                 8.2%   [3, 4]   
 3      max_pooling2d_1   |                  0.2%   |                  0.0%   [5]      
-5      dense_dense       ||                 7.6%   ||||||||||||||||  91.1%   [6, 7]   
+5      dense_dense       ||                 7.6%   ||||||||||||||||  91.0%   [6, 7]   
 6      dense_1_dense     |                  0.1%   |                  0.6%   [8, 9]   
 ------ ----------------- ------------------------- ------------------------- -------- 
-macc=2,688,960 weights=900,136 act=89,700 ram_io=0
+macc=2,689,104 weights=900,652 act=89,700 ram_io=0
 
 Generated files (5)
 ------------------------------------------------- 

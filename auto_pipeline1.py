@@ -1,5 +1,6 @@
 import os
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
 import serial
 import numpy as np
 import shutil, time, subprocess
@@ -7,28 +8,29 @@ from pathlib import Path
 from threading import Thread, Event
 from train1 import retrain_model
 
+#  CONFIG 
+UART_PORT  = "COM4"
+BAUD       = 115200
 
-# CONFIG
-
-UART_PORT = "COM4"
-BAUD      = 115200
-
-CUBIDE    = r"C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\stm32cubeide.exe"
+CUBIDE     = r"C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\stm32cubeide.exe"
 PROGRAMMER = r"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe"
+STEDGEAI   = r"C:\ST\STEdgeAI\3.0\Utilities\windows\stedgeai.exe"
 
-WORKSPACE = r"C:\Users\HP\.stm32cubeaistudio\workspace"
-PROJECT   = "stm32_f429"
-BIN_PATH  = fr"{WORKSPACE}\{PROJECT}\STM32CubeIDE\Debug\{PROJECT}.elf"
+WORKSPACE  = r"C:\Users\HP\.stm32cubeaistudio\workspace"
+PROJECT    = "stm32_f429"
+BIN_PATH   = fr"{WORKSPACE}\{PROJECT}\STM32CubeIDE\Debug\{PROJECT}.elf"
 AI_APP_DIR = fr"{WORKSPACE}\{PROJECT}\AI\App"
 
-CORRECTIONS = Path(r"C:\STM32_OTA1\corrections")
-MODEL       = Path(r"C:\STM32_OTA1\model\mnist.keras")
-GEN_DIR     = Path(r"C:\STM32_OTA1\model\generated")
+CORRECTIONS     = Path(r"C:\STM32_OTA1\corrections")
+INVALID_SAMPLES = Path(r"C:\STM32_OTA1\invalid_samples")   
+MODEL           = Path(r"C:\STM32_OTA1\model\mnist.keras")
+GEN_DIR         = Path(r"C:\STM32_OTA1\model\generated")
 
 MAGIC       = 0xAB
 SAMPLE_SIZE = 2 + 28 * 28
 
 CORRECTIONS.mkdir(parents=True, exist_ok=True)
+INVALID_SAMPLES.mkdir(parents=True, exist_ok=True)         
 GEN_DIR.mkdir(parents=True, exist_ok=True)
 
 pipeline_busy = Event()
@@ -38,8 +40,6 @@ def step1_train():
     return retrain_model()
 
 #  STEdgeAI convert 
-STEDGEAI = r"C:\ST\STEdgeAI\3.0\Utilities\windows\stedgeai.exe"
-
 def step2_stedgeai():
     print("[STEDGEAI] Converting model...")
     r = subprocess.run([
@@ -59,11 +59,11 @@ def step2_stedgeai():
         print(r.stderr[-500:])
         return False
 
-#  Copy generated files 
+# Copy generated files
 def step3_copy():
-    files = ["network.c", "network.h", "network_data.c", "network_data.h"]
+    files   = ["network.c", "network.h", "network_data.c", "network_data.h"]
     dst_dir = Path(AI_APP_DIR)
-    copied = 0
+    copied  = 0
     for fname in files:
         src = GEN_DIR / fname
         dst = dst_dir / fname
@@ -77,7 +77,7 @@ def step3_copy():
     print(f"[COPY] {copied}/{len(files)} files ready")
     return copied > 0
 
-#  Build firmware (automatic)
+#  Build firmware
 def step4_build():
     print("[BUILD] Starting headless build...")
     r = subprocess.run([
@@ -89,8 +89,7 @@ def step4_build():
         "-build", PROJECT,
     ], capture_output=True, text=True, timeout=400)
 
-    # Check for .elf or .bin as success indicator
-    elf = Path(BIN_PATH)
+    elf     = Path(BIN_PATH)
     bin_alt = Path(BIN_PATH.replace(".elf", ".bin"))
 
     if r.returncode == 0 or elf.exists() or bin_alt.exists():
@@ -102,10 +101,9 @@ def step4_build():
         print(r.stderr[-500:])
         return False
 
-#  Flash board (automatic) 
+#  Flash board
 def step5_flash():
-    # Find the binary
-    elf = Path(BIN_PATH)
+    elf      = Path(BIN_PATH)
     bin_file = Path(BIN_PATH.replace(".elf", ".bin"))
 
     if bin_file.exists():
@@ -115,13 +113,13 @@ def step5_flash():
     else:
         print(f"[FLASH] ERROR: No firmware found at {BIN_PATH}")
         return False
+
     print(f"[FLASH] Flashing {fw} ...")
     r = subprocess.run([
         PROGRAMMER,
         "-c", "port=SWD",
         "-w", fw, "0x08000000",
-        "-v",
-        "-rst",
+        "-v", "-rst",
     ], capture_output=True, text=True, timeout=400)
 
     if r.returncode == 0:
@@ -133,7 +131,7 @@ def step5_flash():
         print(r.stderr[-300:])
         return False
 
-# Full pipeline
+#  Full pipeline
 def run_pipeline():
     if pipeline_busy.is_set():
         print("[PIPELINE] Already running — sample saved for next run")
@@ -165,7 +163,7 @@ def run_pipeline():
     print(f"{'=' * 45}\n")
     pipeline_busy.clear()
 
-#  UART listener 
+# UART listener
 def listen_uart():
     try:
         ser = serial.Serial(UART_PORT, BAUD, timeout=5)
@@ -179,10 +177,10 @@ def listen_uart():
     print(f"  Project : {PROJECT}")
     print("=" * 45)
     print("  On board:")
-    print("  1. Draw a digit")
+    print("  1. Draw a digit or letter")
     print("  2. Tap PREDICT")
     print("  3. Tap WRONG")
-    print("  4. Tap correct digit")
+    print("  4. Tap correct label")
     print("  Pipeline starts automatically")
     print("=" * 45 + "\n")
 
@@ -190,6 +188,7 @@ def listen_uart():
     while True:
         try:
             buf += ser.read(ser.in_waiting or 1)
+
             while len(buf) >= SAMPLE_SIZE:
                 idx = buf.find(MAGIC)
                 if idx == -1:
@@ -200,28 +199,34 @@ def listen_uart():
                     buf = buf[idx:]
                 if len(buf) < SAMPLE_SIZE:
                     break
+
                 label  = buf[1]
-                pixels = np.frombuffer(buf[2:2+28*28], dtype=np.uint8).reshape(28,28).copy()
+                pixels = np.frombuffer(buf[2:2+28*28], dtype=np.uint8).reshape(28, 28).copy()
                 buf    = buf[SAMPLE_SIZE:]
-                if label > 10:
+
+                if label > 10:                          
                     print(f"[UART] Invalid label {label}, skipping")
                     continue
-                ts    = int(time.time() * 1000)
-                if label==10:
-                    inv_dir=(r"C\STM32_OTA1\invalid_samples")
-                    inv_dir.mkdir(exist_ok=True)
-                    fname=inv_dir/f"invalid_{ts}.npy"
-                    np.save(str(fname),pixels)
-                    print(f"[RECV] Invalid sample saved")
-                else:    
+
+                ts = int(time.time() * 1000)
+
+                if label == 10:
+                    np.save(str(INVALID_SAMPLES / f"invalid_{ts}.npy"), pixels)
+                    np.save(str(CORRECTIONS / f"label10_{ts}.npy"), pixels)
+                    print(f"[RECV] ✓ Invalid/letter sample saved (label=10)")
+                else:
                     fname = CORRECTIONS / f"label{label}_{ts}.npy"
                     np.save(str(fname), pixels)
-                    print(f"[RECV] ✓ label={label} saved")
+                    print(f"[RECV] ✓ label={label} saved → {fname.name}")
+
                 
+                Thread(target=run_pipeline, daemon=True).start()
+
         except serial.SerialException as e:
             print(f"[UART] Error: {e} — retrying in 2s")
             time.sleep(2)
 
+# Entry point
 if __name__ == "__main__":
     if not MODEL.exists():
         print("=" * 45)
