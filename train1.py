@@ -4,7 +4,7 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 import numpy as np
 import tensorflow as tf
 from pathlib import Path
-import pandas as pd
+
 
 # ── Paths (relative — runs inside GitHub Actions) ────────
 CORRECTIONS = Path("corrections")
@@ -94,6 +94,7 @@ def retrain_model():
     # ── [3] Add synthetic invalid (random noise) ─────────
     
     print("\n[3/4] Adding real handwritten letters as invalid...")
+    import pandas as pd
     CSV = r"C:\Users\HP\Downloads\A_Z Handwritten Data.csv"
     if os.path.exists(CSV):
         df      = pd.read_csv(CSV, header=None)
