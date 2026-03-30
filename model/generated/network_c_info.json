@@ -626,32 +626,32 @@
   ],
   "environment": {
     "generated_model": {
-      "generated_time": "2026-03-30T10:30:56+0530",
+      "generated_time": "2026-03-30T14:14:42+0530",
       "model_files": [
         {
           "name": "network_data.h",
-          "signature": "0xd0c6dd6eb0a41e5b058e724ff91d9348"
+          "signature": "0x7299305eff4811df6166a0809a8234d7"
         },
         {
           "name": "network_data.c",
-          "signature": "0xb4fb2a11c72427eea9104dacf9351c45"
+          "signature": "0x0badf212cf7e90096e35aff7455e7e97"
         },
         {
           "name": "network.h",
-          "signature": "0x12766da5d98be97edbab8ae3f6406d07"
+          "signature": "0x646bcba4d06dc10ac14d92c68aaa3fae"
         },
         {
           "name": "network.c",
-          "signature": "0x5e8f85bfd7388b84848cad7a94eca2da"
+          "signature": "0x71f4ae2889e39f87ee34c6262a08593a"
         },
         {
           "name": "network_details.h",
-          "signature": "0x8cfeb233b5b593f84922095a7de33d74"
+          "signature": "0xe6066462dd030023902de01934616f82"
         }
       ],
       "name": "network"
     },
-    "network_signature": "0x26f427ad86d12fbe",
+    "network_signature": "0xd944335da9a4418d",
     "test_name": "",
     "tools": [
       {
@@ -661,7 +661,7 @@
           "model_files": [
             {
               "name": "mnist.keras",
-              "signature": "0x60979eba36394bf7404cb10e4b7fa782"
+              "signature": "0x0a6a0f372fda699d00aa99ab43553526"
             }
           ],
           "n_params": 225163,

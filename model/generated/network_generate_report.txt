@@ -1,5 +1,5 @@
 ST Edge AI Core v3.0.0-20426 123672867
-Created date          : 2026-03-30 10:30:57
+Created date          : 2026-03-30 14:14:43
 Parameters            : generate --model C:\STM32_OTA1\model\mnist.keras --target stm32f4 --output C:\STM32_OTA1\model\generated --name network
 
 Exec/report summary (generate)
@@ -15,7 +15,7 @@ workspace dir      :   C:\STM32_OTA1\st_ai_ws
 output dir         :   C:\STM32_OTA1\model\generated                                    
 model_fmt          :   float                                                            
 model_name         :   mnist                                                            
-model_hash         :   0x60979eba36394bf7404cb10e4b7fa782                               
+model_hash         :   0x0a6a0f372fda699d00aa99ab43553526                               
 params #           :   225,163 items (879.54 KiB)                                       
 ----------------------------------------------------------------------------------------
 input 1/1          :   'input_0', f32(1x28x28x1), 3.06 KBytes, activations              

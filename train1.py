@@ -4,6 +4,7 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 import numpy as np
 import tensorflow as tf
 from pathlib import Path
+import pandas as pd
 
 # ── Paths (relative — runs inside GitHub Actions) ────────
 CORRECTIONS = Path("corrections")
@@ -92,14 +93,26 @@ def retrain_model():
 
     # ── [3] Add synthetic invalid (random noise) ─────────
     
-    print("\n[3/4] Adding synthetic invalid samples...")
-    np.random.seed(42)
-    x_noise = np.random.rand(2000, 28, 28, 1).astype("float32")
-    y_noise = np.full(2000, 10, dtype=np.int32)
-    sx = np.concatenate([sx, x_noise])
-    sy = np.concatenate([sy, y_noise])
-    print(f"      Noise samples added: 2000")
-
+    print("\n[3/4] Adding real handwritten letters as invalid...")
+    CSV = r"C:\Users\HP\Downloads\A_Z Handwritten Data.csv"
+    if os.path.exists(CSV):
+        df      = pd.read_csv(CSV, header=None)
+        pixels  = df.iloc[:, 1:].values.astype("float32") / 255.0
+        x_az    = pixels.reshape(-1, 28, 28, 1)
+        # Take 200 samples per letter = 5200 total
+        lbl_col = df.iloc[:, 0].values.astype(np.int32)
+        x_inv, y_inv = [], []
+        for cls in range(26):
+            idx = np.where(lbl_col == cls)[0][:200]
+            x_inv.append(x_az[idx])
+            y_inv.append(np.full(len(idx), 10, dtype=np.int32))
+        x_inv = np.concatenate(x_inv)
+        y_inv = np.concatenate(y_inv)
+        sx = np.concatenate([sx, x_inv])
+        sy = np.concatenate([sy, y_inv])
+        print(f"      Letter samples added: {len(x_inv)}")
+    else:
+        print("      CSV not found — skipping letters")
     # ── Shuffle ──────────────────────────────────────────
     idx  = np.random.permutation(len(sx))
     sx   = sx[idx]

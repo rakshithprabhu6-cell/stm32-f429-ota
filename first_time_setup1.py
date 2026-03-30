@@ -6,7 +6,6 @@ os.environ["TF_NUM_INTRAOP_THREADS"] = "4"
 import numpy as np
 import tensorflow as tf
 from pathlib import Path
-from PIL import Image
 
 # Create all folders
 Path(r"C:\STM32_OTA1\model").mkdir(parents=True,        exist_ok=True)
@@ -17,9 +16,7 @@ Path(r"C:\STM32_OTA1\invalid_samples").mkdir(parents=True, exist_ok=True)
 NUM_CLASSES  = 11
 MODEL        = r"C:\STM32_OTA1\model\mnist.keras"
 BASE_MODEL   = r"C:\STM32_OTA1\model\mnist_base.keras"
-IMG_FOLDER   = r"C:\Users\HP\Downloads\archive (5)\Img"
-MAX_PER_CLASS = 300   # max images per letter (img011–img062)
-                      # 52 classes × 300 = 15600 letter samples total
+
 
 print("=" * 45)
 print("  STM32 OTA1 — First Time Setup")
@@ -36,57 +33,35 @@ print(f"      Train : {x_train.shape}")
 print(f"      Test  : {x_test.shape}")
 
 # ── [2/4] Load EMNIST letter PNGs (class 10 = Invalid) ──
-print("\n[2/4] Loading EMNIST letter images (class 10 = invalid)...")
-print(f"      Source: {IMG_FOLDER}")
+print("\n[2/4] Loading handwritten alphabet CSV (class 10 = invalid)...")
+import pandas as pd
 
-all_files = sorted(os.listdir(IMG_FOLDER))
+df     = pd.read_csv(r"C:\Users\HP\Downloads\archive (8)\A_Z Handwritten Data\A_Z Handwritten Data.csv", header=None)
+labels = df.iloc[:, 0].values.astype(np.int32)
+pixels = df.iloc[:, 1:].values.astype("float32") / 255.0
+x_az   = pixels.reshape(-1, 28, 28, 1)
 
-# Group files by prefix number (img011 → 11, img062 → 62)
-from collections import defaultdict
-class_files = defaultdict(list)
-for fname in all_files:
-    if not fname.endswith('.png'):
-        continue
-    try:
-        prefix = int(fname[3:6])   
-        if prefix >= 11:           
-            class_files[prefix].append(fname)
-    except ValueError:
-        continue
+# Cap per class to 5000 to fix imbalance
+MAX_PER_CLASS = 5000
+x_bal, y_bal  = [], []
+for cls in range(26):
+    idx = np.where(labels == cls)[0]
+    idx = idx[:MAX_PER_CLASS]
+    x_bal.append(x_az[idx])
+    y_bal.append(np.full(len(idx), 10, dtype=np.int32))
 
-print(f"      Letter classes found: {len(class_files)}  (expected 52)")
+x_az = np.concatenate(x_bal, axis=0)
+y_az = np.concatenate(y_bal, axis=0)
+print(f"      Total letters : {len(x_az)}")
 
-x_az_list = []
-total_loaded = 0
-
-for prefix in sorted(class_files.keys()):
-    files = class_files[prefix][:MAX_PER_CLASS]
-    for fname in files:
-        img_path = os.path.join(IMG_FOLDER, fname)
-        try:
-            img = Image.open(img_path).convert('L')
-            img = img.resize((28, 28), Image.LANCZOS)
-            arr = np.array(img).astype("float32") / 255.0
-
-            # Per-image inversion: MNIST = white digit on black bg
-            if arr.mean() > 0.5:
-                arr = 1.0 - arr
-
-            x_az_list.append(arr)
-            total_loaded += 1
-        except Exception as e:
-            print(f"      Skipped {fname}: {e}")
-
-x_az = np.array(x_az_list)[..., np.newaxis]  # (N, 28, 28, 1)
-y_az = np.full(len(x_az), 10, dtype=np.int32)
-print(f"      Letter images loaded: {len(x_az)}")
-
-# Split 10% of letters for validation
+# Split 10% for validation
+idx        = np.random.permutation(len(x_az))
 split      = int(0.9 * len(x_az))
-x_az_train, x_az_val = x_az[:split], x_az[split:]
-y_az_train, y_az_val = y_az[:split], y_az[split:]
+x_az_train = x_az[idx[:split]]
+y_az_train = y_az[idx[:split]]
+x_az_val   = x_az[idx[split:]]
+y_az_val   = y_az[idx[split:]]
 
-# Add letter validation to MNIST test set
 x_val = np.concatenate([x_test, x_az_val], axis=0)
 y_val = np.concatenate([y_test, y_az_val], axis=0)
 print(f"      Validation: {len(x_test)} digits + {len(x_az_val)} letters = {len(x_val)} total")
