@@ -50,7 +50,7 @@ def load_corrections():
     return np.array(cx), np.array(cy, dtype=np.int32)
 
 
-def retrain():
+def retrain_model():
     print("=" * 45)
     print("  Cloud Retrain — GitHub Actions")
     print("=" * 45)
@@ -80,7 +80,7 @@ def retrain():
     print(f"      Invalid corrections: {invalid_count}")
 
     if len(cx) > 0:
-        # Repeat corrections to boost their weight
+        # Repeating corrections to boost their weight
         rep = max(5, 50 // len(cx))
         cx  = np.repeat(cx, rep, axis=0)
         cy  = np.repeat(cy, rep, axis=0)
@@ -91,7 +91,7 @@ def retrain():
         print("      No corrections found")
 
     # ── [3] Add synthetic invalid (random noise) ─────────
-    # Ensures model never forgets invalid class even without letters
+    
     print("\n[3/4] Adding synthetic invalid samples...")
     np.random.seed(42)
     x_noise = np.random.rand(2000, 28, 28, 1).astype("float32")
