@@ -48,8 +48,8 @@ for fname in all_files:
     if not fname.endswith('.png'):
         continue
     try:
-        prefix = int(fname[3:6])   # 'img011-001.png' → 11
-        if prefix >= 11:           # only letters (digits already deleted)
+        prefix = int(fname[3:6])   
+        if prefix >= 11:           
             class_files[prefix].append(fname)
     except ValueError:
         continue
@@ -124,11 +124,16 @@ model.summary()
 print("\n      Training... (5-6 min on i3, please wait)")
 print("      Do NOT close this window\n")
 
+
+
+cw = {i : 1.0 for i in range (10)}
+cw[10] = 15.0
 model.fit(
     x_all, y_all,
     epochs          = 5,
     batch_size      = 128,
     validation_data = (x_val, y_val),
+    class_weight    = cw,
     verbose         = 1,
 )
 
