@@ -97,27 +97,51 @@ def retrain_model():
 
     # ── [3] Add synthetic invalid (random noise) ─────────
     
-    print("\n[3/4] Adding real handwritten letters as invalid...")
-    import pandas as pd
-    CSV = r"C:\Users\HP\Downloads\A_Z Handwritten Data.csv"
-    if os.path.exists(CSV):
-        df      = pd.read_csv(CSV, header=None)
-        pixels  = df.iloc[:, 1:].values.astype("float32") / 255.0
-        x_az    = pixels.reshape(-1, 28, 28, 1)
-        # Take 200 samples per letter = 5200 total
-        lbl_col = df.iloc[:, 0].values.astype(np.int32)
-        x_inv, y_inv = [], []
-        for cls in range(26):
-            idx = np.where(lbl_col == cls)[0][:200]
-            x_inv.append(x_az[idx])
-            y_inv.append(np.full(len(idx), 10, dtype=np.int32))
-        x_inv = np.concatenate(x_inv)
-        y_inv = np.concatenate(y_inv)
+    print("\n[3/4] Adding handwritten letters as invalid...")
+
+    CSV_LOCAL = r"C:\Users\HP\Downloads\A_Z Handwritten Data.csv"
+    CSV_CLOUD = "A_Z Handwritten Data.csv"
+    CSV = CSV_LOCAL if os.path.exists(CSV_LOCAL) else \
+      CSV_CLOUD  if os.path.exists(CSV_CLOUD) else None
+
+    if CSV:
+      import pandas as pd
+      df      = pd.read_csv(CSV, header=None)
+      lbl_col = df.iloc[:, 0].values.astype(np.int32)
+      pixels  = df.iloc[:, 1:].values.astype("float32") / 255.0
+      x_az    = pixels.reshape(-1, 28, 28, 1)
+      x_inv, y_inv = [], []
+      for cls in range(26):
+        idx = np.where(lbl_col == cls)[0][:200]
+        x_inv.append(x_az[idx])
+        y_inv.append(np.full(len(idx), 10, dtype=np.int32))
+      x_inv = np.concatenate(x_inv)
+      y_inv = np.concatenate(y_inv)
+      sx = np.concatenate([sx, x_inv])
+      sy = np.concatenate([sy, y_inv])
+      print(f"      Letter samples added: {len(x_inv)}")
+    else:
+      print("      CSV not found — using EMNIST fallback...")
+      try:
+          import tensorflow_datasets as tfds
+          ds    = tfds.load("emnist/letters", split="train", as_supervised=True)
+          x_inv, y_inv = [], []
+          for img, _ in ds.take(5200):
+            arr = img.numpy().astype("float32") / 255.0
+            x_inv.append(arr)
+            y_inv.append(10)
+          x_inv = np.array(x_inv)
+          y_inv = np.array(y_inv, dtype=np.int32)
+          sx = np.concatenate([sx, x_inv])
+          sy = np.concatenate([sy, y_inv])
+          print(f"      EMNIST letters added: {len(x_inv)}")
+      except Exception as e:
+        print(f"      EMNIST failed ({e}) — using noise")
+        x_inv = np.random.rand(2000, 28, 28, 1).astype("float32")
+        y_inv = np.full(2000, 10, dtype=np.int32)
         sx = np.concatenate([sx, x_inv])
         sy = np.concatenate([sy, y_inv])
-        print(f"      Letter samples added: {len(x_inv)}")
-    else:
-        print("      CSV not found — skipping letters")
+        print(f"      Noise fallback: 2000 samples")
     # ── Shuffle ──────────────────────────────────────────
     idx  = np.random.permutation(len(sx))
     sx   = sx[idx]
