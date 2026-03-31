@@ -42,7 +42,7 @@ pixels = df.iloc[:, 1:].values.astype("float32") / 255.0
 x_az   = pixels.reshape(-1, 28, 28, 1)
 
 # Cap per class to 5000 to fix imbalance
-MAX_PER_CLASS = 5000
+MAX_PER_CLASS = 8000
 x_bal, y_bal  = [], []
 for cls in range(26):
     idx = np.where(labels == cls)[0]
@@ -102,10 +102,10 @@ print("      Do NOT close this window\n")
 
 
 cw = {i : 1.0 for i in range (10)}
-cw[10] = 15.0
+cw[10] = 25.0
 model.fit(
     x_all, y_all,
-    epochs          = 5,
+    epochs          = 10,
     batch_size      = 128,
     validation_data = (x_val, y_val),
     class_weight    = cw,

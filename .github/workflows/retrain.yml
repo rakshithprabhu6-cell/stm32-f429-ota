@@ -1,39 +1,61 @@
 name: Retrain OTA
-
 on:
   workflow_dispatch:
   push:
     paths:
       - 'corrections/**'
+      - 'invalid_samples/**'
 
 concurrency:
   group: retrain
   cancel-in-progress: true
 
-permissions:
-  contents: write
-
 jobs:
   retrain:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Install dependencies
-        run: pip install tensorflow==2.18.0 numpy==2.0.2
-
+        run: pip install tensorflow==2.18.0 numpy==2.0.2 Pillow==10.4.0 keras==3.5.0 pandas tensorflow-datasets
       - name: Train
         env:
           PYTHONIOENCODING: utf-8
-          PYTHONUTF8: 1
+          PYTHONUTF8: "1"
         run: python train1.py
+
+      - name: Commit trained model
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add model/mnist.keras
+          git diff --staged --quiet || git commit -m "Update model [run ${{ github.run_number }}]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: model-${{ github.run_number }}
+          release_name: "Model v${{ github.run_number }}"
+          body: "Auto-retrained model from corrections"
+          draft: false
+          prerelease: false
+
+      - name: Upload model to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: model/mnist.keras
+          asset_name: mnist.keras
+          asset_content_type: application/octet-stream
 
       - name: Upload model artifact
         uses: actions/upload-artifact@v4
@@ -41,11 +63,3 @@ jobs:
           name: trained-model
           path: model/mnist.keras
           retention-days: 30
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: model-${{ github.run_number }}
-          files: model/mnist.keras
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

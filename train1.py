@@ -25,7 +25,7 @@ def load_corrections():
 
     for f in sorted(CORRECTIONS.glob("*.npy")):
         try:
-            pixels = np.load(str(f)).astype("float32")
+            pixels = np.load(str(f), allow_pickle=True).astype("float32")
 
             # Reshape if needed
             if pixels.ndim == 2:
@@ -142,6 +142,8 @@ def retrain_model():
         sx = np.concatenate([sx, x_inv])
         sy = np.concatenate([sy, y_inv])
         print(f"      Noise fallback: 2000 samples")
+    x_val_combined = np.concatenate([x_te, x_inv[:500]], axis=0)
+    y_val_combined = np.concatenate([y_te, y_inv[:500]], axis=0)
     # ── Shuffle ──────────────────────────────────────────
     idx  = np.random.permutation(len(sx))
     sx   = sx[idx]
@@ -189,12 +191,15 @@ def retrain_model():
 
     # ── Train ────────────────────────────────────────────
     print(f"\n      Training {epochs} epoch(s)...\n")
+    cw ={i : 1.0 for i in range (10)}
+    cw[10]=25.0
     model.fit(
         sx, sy,
         epochs          = epochs,
         batch_size      = 128,
-        validation_data = (x_te, y_te),
-        verbose         = 1,
+        validation_data = (x_val_combined, y_val_combined),
+        class_weight    = cw,
+        verbose         = 2,
     )
 
     # ── Evaluate ─────────────────────────────────────────
