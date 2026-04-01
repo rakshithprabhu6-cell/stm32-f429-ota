@@ -99,7 +99,7 @@ def retrain_model():
     
     print("\n[3/4] Adding handwritten letters as invalid...")
 
-    CSV_LOCAL = r"C:\Users\HP\Downloads\A_Z Handwritten Data.csv"
+    CSV_LOCAL = r"C:\Users\HP\Downloads\archive (8)\A_Z Handwritten Data.csv"
     CSV_CLOUD = "A_Z Handwritten Data.csv"
     CSV = CSV_LOCAL if os.path.exists(CSV_LOCAL) else \
       CSV_CLOUD  if os.path.exists(CSV_CLOUD) else None
