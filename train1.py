@@ -191,14 +191,12 @@ def retrain_model():
 
     # ── Train ────────────────────────────────────────────
     print(f"\n      Training {epochs} epoch(s)...\n")
-    cw ={i : 1.0 for i in range (10)}
-    cw[10]=25.0
+    
     model.fit(
         sx, sy,
         epochs          = epochs,
         batch_size      = 128,
         validation_data = (x_val_combined, y_val_combined),
-        class_weight    = cw,
         verbose         = 2,
     )
 
