@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: pip install tensorflow==2.18.0 numpy==2.0.2 Pillow==10.4.0 keras==3.5.0 pandas tensorflow-datasets
+        run: pip install tensorflow==2.18.0 numpy==2.0.2 Pillow==10.4.0 keras==3.5.0 pandas tensorflow-datasets importlib-resources
       - name: Train
         env:
           PYTHONIOENCODING: utf-8
