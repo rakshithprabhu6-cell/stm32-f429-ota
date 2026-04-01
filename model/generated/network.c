@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    network.c
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-04-01T13:18:51+0530
+  * @date    2026-04-01T14:18:43+0530
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -152,8 +152,8 @@
 
 
 /*****************************************************************************/
-#define _STAI_NETWORK_MODEL_SIGNATURE     "0x60758ed4c294cf126dd4e66f93cf33e2"
-#define _STAI_NETWORK_DATETIME            "2026-04-01T13:18:51+0530"
+#define _STAI_NETWORK_MODEL_SIGNATURE     "0x186075110476b2b62c219ca1eb11ba4f"
+#define _STAI_NETWORK_DATETIME            "2026-04-01T14:18:43+0530"
 #define _STAI_NETWORK_COMPILE_DATETIME    __DATE__ " " __TIME__
 
 #define _STAI_CONTEXT_ALIGNMENT        STAI_NETWORK_CONTEXT_ALIGNMENT
