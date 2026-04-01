@@ -61,10 +61,8 @@ def upload_sample(label, pixels):
     content = base64.b64encode(buf.getvalue()).decode()
 
     
-    if label == 10:
-        fname = f"invalid_{ts}.npy"
-    else:
-        fname = f"label{label}_{ts}.npy"
+    
+    fname = f"label{label}_{ts}.npy"
 
     r = requests.put(
         f"https://api.github.com/repos/{GITHUB_REPO}/contents/corrections/{fname}",
