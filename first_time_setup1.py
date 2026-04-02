@@ -102,7 +102,7 @@ print("      Do NOT close this window\n")
 
 
 cw = {i : 1.0 for i in range (10)}
-cw[10] = 25.0
+cw[10] = 15.0
 model.fit(
     x_all, y_all,
     epochs          = 10,

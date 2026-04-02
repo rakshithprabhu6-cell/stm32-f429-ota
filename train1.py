@@ -192,7 +192,7 @@ def retrain_model():
     # ── Train ────────────────────────────────────────────
     print(f"\n      Training {epochs} epoch(s)...\n")
     cw ={i : 1.0 for i in range (10)}
-    cw[10]=25.0
+    cw[10]=15.0
     model.fit(
         sx, sy,
         epochs          = epochs,
